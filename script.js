@@ -1,67 +1,100 @@
 document.addEventListener('DOMContentLoaded',()=>{
-    var memoryOptions = document.querySelectorAll('input[name="memory"]');
-    var colorOptions = document.querySelectorAll('input[name="color"]');
-    var submitBtn= document.getElementById('submitBtn');
-    const products = {
-  "red_64gb": 1001,
-  "black_64gb": 1002,
-  "red_256gb": 1003,
-  "black_128gb": 1004,
-};
-     submitBtn.addEventListener("click", function(){ 
-         const colorSelected = document.querySelector('input[name="color"]:checked'); 
-         const memorySelected = document.querySelector('input[name="memory"]:checked'); 
-         if(colorSelected==null)
-         {
-            alert("Color is not selected");
-            return;
-        }
-        else if(memorySelected ==null){
-            alert("memory is not selected");
-            return ;
-        }
-        const productId = products[`${colorSelected.value}_${memorySelected.value}`];
-        console.log(`${colorSelected.value}_${memorySelected.value}`);
-        alert(`Iphone ${productId}` );
-     });
-    function updateOptionSelection()
-    {
-        const colorSelected = document.querySelector('input[name="color"]:checked'); 
-        if(colorSelected)
-        {
-            var color= colorSelected.value;
-            memoryOptions.forEach(memOption => {
-                if(color==="red")
-                {
-                    if(memOption.value === "64gb" || memOption.value==="256gb")
-                    memOption.disabled=false;
-                    else{
-                        memOption.disabled=true;
-                        memOption.checked=false;
-                    }
-            }
-            else if (color ==="black")
-            {
-                    if(memOption.value === "64gb" || memOption.value==="128gb")
-                    memOption.disabled=false;
-                    else
-                    {
-                        memOption.disabled=true;
-                        memOption.checked=false;
-                    }
+    var btn64gb = document.getElementById('64GB');
+    var btn128gb = document.getElementById('128GB');
+    var btn256gb = document.getElementById('256GB');
+    var btnred = document.getElementById('red');
+    var btnblack = document.getElementById('black');
+    var btnwhite = document.getElementById('white');
+    var btnsubmit = document.getElementById('submitBtn');
 
-                }
-                else{
-                        memOption.checked=false;
-                    memOption.disabled=true;
-                }
-            })
+    var currentcolor = '';
+    var currentmemory = '';
+    function updatecolor(color)
+    {
+        currentcolor = color;
+        if(color=='red'&& currentmemory=='128GB')
+        currentmemory = '';
+        else if(color=='white' && currentmemory!='')
+        currentmemory = '';
+        else if(color=='black'&& currentmemory=='256GB')
+        currentmemory = '';
+    }
+    function updatememory(memory)
+    {
+        currentmemory = memory;
+        if(memory=='128GB' && (currentcolor=='red' || currentcolor=='white') )
+        currentcolor = '';
+        else if(memory=='256GB' && (currentcolor=='black' || currentcolor=='white'))
+        currentcolor = '';
+        else if(memory=='64GB' && currentcolor=='white')
+        currentcolor = '';
+    }
+    function enablebuttons(buttons)
+    {
+        buttons.forEach(button => {
+            button.disabled=false;
+        });
+    }
+    function disablebuttons(buttons)
+    {
+        buttons.forEach(button => {
+            button.disabled=true;
+        });
+    }
+    btn64gb.addEventListener('click',()=>{
+        updatememory('64GB');
+        disablebuttons([btnwhite]);
+        enablebuttons([btnred,btnblack,btn128gb,btn256gb]);
+    })
+    btn128gb.addEventListener('click',()=>{
+        updatememory('128GB');
+        disablebuttons([btnwhite,btnred]);
+        enablebuttons([btnblack,btn256gb,btn64gb]);
+    })
+    btn256gb.addEventListener('click',()=>{
+        updatememory('256GB');
+        disablebuttons([btnwhite,btnblack]);
+        enablebuttons([btnred,btn128gb,btn64gb]);
+    })
+    btnred.addEventListener('click',()=>{
+        updatecolor('red');
+        disablebuttons([btn128gb]);
+        enablebuttons([btnwhite,btnblack,btn256gb,btn64gb]);
+    })
+    btnwhite.addEventListener('click',()=>{
+        updatecolor('white');
+        disablebuttons([btn128gb,btn64gb,btn256gb]);
+        enablebuttons([btnred,btnblack]);
+    })
+    btnblack.addEventListener('click',()=>{
+        updatecolor('black');
+        disablebuttons([btn256gb]);
+        enablebuttons([btnred,btnwhite,btn128gb,btn64gb]);
+    })
+    btnsubmit.addEventListener('click',submit);
+    const id ={
+        "64GB red":1001,
+        "64GB black":1002,
+        "256GB red":1003,
+        "128GB black":1004,
+    }
+    function submit()
+    {
+        if(currentcolor=='' &&  currentmemory=='')
+        {
+            alert('Please select memory and color');
+        }
+        else if(currentcolor=='')
+        {
+            alert('Please select color');
+        }
+        else if(currentmemory=='')
+        {
+            alert('Please select memory');
         }
         else{
-            memoryOptions.forEach( memOption=> memOption.disabled=false);
-            // if the color is not selected then we are make suring that all memory options are enabled
+            const productid = id[currentmemory+' '+currentcolor];
+            alert(`product id is ${productid}`);
         }
-    } 
-    colorOptions.forEach(colorOption=> colorOption.addEventListener('change',updateOptionSelection));
-
-});
+    }   
+})
