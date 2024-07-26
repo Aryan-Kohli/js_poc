@@ -1,100 +1,107 @@
-document.addEventListener('DOMContentLoaded',()=>{
-    var btn64gb = document.getElementById('64GB');
-    var btn128gb = document.getElementById('128GB');
-    var btn256gb = document.getElementById('256GB');
-    var btnred = document.getElementById('red');
-    var btnblack = document.getElementById('black');
-    var btnwhite = document.getElementById('white');
-    var btnsubmit = document.getElementById('submitBtn');
+document.addEventListener('DOMContentLoaded', function() {
+     const colors = ['Red', 'Black', 'White'];
+    const memoryOptions = ['64GB', '128GB', '256GB'];
+    const products = [
+        [1001, 'iPhone 64GB Red'],
+        [1002, 'iPhone 64GB Black'],
+        [1003, 'iPhone 256GB Red'],
+        [1004, 'iPhone 128GB Black']
+    ];
+    const productCombinations = [
+        { productID: 1001, colorID: 0, memoryID: 0 },
+        { productID: 1002, colorID: 1, memoryID: 0 },
+        { productID: 1003, colorID: 0, memoryID: 2 },
+        { productID: 1004, colorID: 1, memoryID: 1 }
+    ];
 
-    var currentcolor = '';
-    var currentmemory = '';
-    function updatecolor(color)
-    {
-        currentcolor = color;
-        if(color=='red'&& currentmemory=='128GB')
-        currentmemory = '';
-        else if(color=='white' && currentmemory!='')
-        currentmemory = '';
-        else if(color=='black'&& currentmemory=='256GB')
-        currentmemory = '';
+    const colorButtons = document.getElementById('colorsDiv');
+    const memoryButtons = document.getElementById('memoryDiv');
+    const submitSelection = document.getElementById('submitBtn');
+    let selectedColorId=null;
+    let selectedMemoryId=null;
+    colors.forEach((color, index) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-outline-primary';
+        btn.textContent = color;
+        btn.addEventListener('click', () => selectColor(index));
+        colorButtons.appendChild(btn);
+    });
+
+    memoryOptions.forEach((memory, index) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-outline-secondary';
+        btn.textContent = memory;
+        btn.addEventListener('click', () => selectMemory(index));
+        memoryButtons.appendChild(btn);
+    });
+    function selectColor(colorID) {
+        selectedColorId = colorID;
+        updateMemoryButtons(colorID);
+        updateButtonSelection(colorButtons, colorID);
     }
-    function updatememory(memory)
-    {
-        currentmemory = memory;
-        if(memory=='128GB' && (currentcolor=='red' || currentcolor=='white') )
-        currentcolor = '';
-        else if(memory=='256GB' && (currentcolor=='black' || currentcolor=='white'))
-        currentcolor = '';
-        else if(memory=='64GB' && currentcolor=='white')
-        currentcolor = '';
+
+    function selectMemory(memoryID) {
+        selectedMemoryId = memoryID;
+        updateColorButtons(memoryID);
+        updateButtonSelection(memoryButtons, memoryID);
     }
-    function enablebuttons(buttons)
-    {
-        buttons.forEach(button => {
-            button.disabled=false;
+       function updateMemoryButtons(selectedColorID) {
+        const availableMemoryIDs = productCombinations
+            .filter(combination => combination.colorID === selectedColorID)
+            .map(combination => combination.memoryID);
+
+        Array.from(memoryButtons.children).forEach((btn, index) => {
+            btn.disabled = !availableMemoryIDs.includes(index);
+            if (!availableMemoryIDs.includes(index)) {
+                btn.classList.remove('active');
+                btn.classList.add('disabled');
+            } else {
+                btn.classList.remove('disabled');
+            }
         });
     }
-    function disablebuttons(buttons)
-    {
-        buttons.forEach(button => {
-            button.disabled=true;
+    function updateColorButtons(selectedMemoryID) {
+    const availableColorIDs = productCombinations
+        .filter(combination => combination.memoryID === selectedMemoryID)
+        .map(combination => combination.colorID);
+
+    Array.from(colorButtons.children).forEach((btn, index) => {
+        btn.disabled = !availableColorIDs.includes(index);
+        if (!availableColorIDs.includes(index)) {
+            btn.classList.remove('active');
+            btn.classList.add('disabled');
+        } else {
+            btn.classList.remove('disabled');
+        }
+    });
+}
+
+    function updateButtonSelection(group, selectedIndex) {
+        Array.from(group.children).forEach((btn, index) => {
+            if (index === selectedIndex) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
         });
     }
-    btn64gb.addEventListener('click',()=>{
-        updatememory('64GB');
-        disablebuttons([btnwhite]);
-        enablebuttons([btnred,btnblack,btn128gb,btn256gb]);
-    })
-    btn128gb.addEventListener('click',()=>{
-        updatememory('128GB');
-        disablebuttons([btnwhite,btnred]);
-        enablebuttons([btnblack,btn256gb,btn64gb]);
-    })
-    btn256gb.addEventListener('click',()=>{
-        updatememory('256GB');
-        disablebuttons([btnwhite,btnblack]);
-        enablebuttons([btnred,btn128gb,btn64gb]);
-    })
-    btnred.addEventListener('click',()=>{
-        updatecolor('red');
-        disablebuttons([btn128gb]);
-        enablebuttons([btnwhite,btnblack,btn256gb,btn64gb]);
-    })
-    btnwhite.addEventListener('click',()=>{
-        updatecolor('white');
-        disablebuttons([btn128gb,btn64gb,btn256gb]);
-        enablebuttons([btnred,btnblack]);
-    })
-    btnblack.addEventListener('click',()=>{
-        updatecolor('black');
-        disablebuttons([btn256gb]);
-        enablebuttons([btnred,btnwhite,btn128gb,btn64gb]);
-    })
-    btnsubmit.addEventListener('click',submit);
-    const id ={
-        "64GB red":1001,
-        "64GB black":1002,
-        "256GB red":1003,
-        "128GB black":1004,
+
+    function getProductID(colorID, memoryID) {
+        const combination = productCombinations.find(combination => combination.colorID === colorID && combination.memoryID === memoryID);
+        return combination ? combination.productID : null;
     }
-    function submit()
-    {
-        if(currentcolor=='' &&  currentmemory=='')
-        {
-            alert('Please select memory and color');
+
+    submitSelection.addEventListener('click', () => {
+        const productID = getProductID(selectedColorId, selectedMemoryId);
+
+        if (productID) {
+            alert(`Selected Product ID: ${productID}`);
+        } else {
+            alert('No product available for the selected options.');
         }
-        else if(currentcolor=='')
-        {
-            alert('Please select color');
-        }
-        else if(currentmemory=='')
-        {
-            alert('Please select memory');
-        }
-        else{
-            const productid = id[currentmemory+' '+currentcolor];
-            alert(`product id is ${productid}`);
-        }
-    }   
-})
+
+        $('#staticBackdrop').modal('hide');
+    });
+});
